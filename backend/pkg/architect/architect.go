@@ -62,7 +62,7 @@ func New() *Architect {
 	velocity.SetLogLevel()
 	a := &Architect{
 		Server:   echo.New(),
-		LogsPath: "/var/velocityci/logs",
+		LogsPath: "/opt/velocityci/logs",
 	}
 
 	return a
@@ -70,13 +70,13 @@ func New() *Architect {
 
 func (a *Architect) Init() {
 	if a.DB == nil {
-		a.DB = domain.NewStormDB("/var/velocityci/architect.db")
+		a.DB = domain.NewStormDB("/opt/velocityci/architect.db")
 	}
 	validator, trans := domain.NewValidator()
 	userManager := user.NewManager(a.DB, validator, trans)
 	userManager.EnsureAdminUser()
 	knownHostManager := knownhost.NewManager(a.DB, validator, trans, "")
-	projectManager := project.NewManager(a.DB, validator, trans, velocity.GitClone)
+	projectManager := project.NewManager(a.DB, validator, trans, velocity.Clone)
 	commitManager := githistory.NewCommitManager(a.DB)
 	branchManager := githistory.NewBranchManager(a.DB)
 	taskManager := task.NewManager(a.DB, projectManager, branchManager, commitManager)

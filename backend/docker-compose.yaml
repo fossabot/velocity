@@ -11,8 +11,8 @@ services:
       - "8080:8080"
 
   architect:
-    image: golang:1.9
-    command: go run cmd/vci-architect/main.go
+    image: golang:1.10
+    command: /bin/sh -c "eval `ssh-agent` && go run cmd/vci-architect/main.go"
     working_dir: /go/src/github.com/velocity-ci/velocity/backend/
     environment:
       # LOG_LEVEL: debug
@@ -24,11 +24,11 @@ services:
       - "80:80"
     volumes:
       - "./:/go/src/github.com/velocity-ci/velocity/backend/"
-      - "./architect_data:/var/velocityci"
+      - "./architect_data:/opt/velocityci"
 
   builder:
-    image: golang:1.9
-    command: go run cmd/vci-builder/main.go
+    image: golang:1.10
+    command: /bin/sh -c "eval `ssh-agent` && go run cmd/vci-builder/main.go"
     working_dir: /go/src/github.com/velocity-ci/velocity/backend/
     environment:
       LOG_LEVEL: debug
@@ -36,5 +36,5 @@ services:
       ARCHITECT_ADDRESS: http://architect
     volumes:
       - "./:/go/src/github.com/velocity-ci/velocity/backend/"
-      - "/var/velocityci:/var/velocityci"
+      - "/opt/velocityci:/opt/velocityci"
       - "/var/run/docker.sock:/var/run/docker.sock"
