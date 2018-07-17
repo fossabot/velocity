@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/asdine/storm"
+	"github.com/dgraph-io/badger"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/velocity-ci/velocity/backend/pkg/architect/rest"
@@ -28,6 +29,7 @@ type Architect struct {
 	workerWg sync.WaitGroup
 	Workers  []domain.Worker
 	DB       *storm.DB
+	bDB      *badger.DB
 }
 
 func (a *Architect) Start() {
@@ -50,6 +52,9 @@ func (a *Architect) Stop() error {
 		w.StopWorker()
 	}
 
+	a.DB.Close()
+	a.bDB.Close()
+
 	return a.Server.Shutdown(ctx)
 }
 
@@ -70,6 +75,9 @@ func (a *Architect) Init() {
 	if a.DB == nil {
 		a.DB = domain.NewStormDB("/opt/velocityci/architect.db")
 	}
+	if a.bDB == nil {
+		a.bDB = domain.NewBadgerDB("/opt/velocityci/badgerdb")
+	}
 	validator, trans := domain.NewValidator()
 	userManager := user.NewManager(a.DB, validator, trans)
 	userManager.EnsureAdminUser()
@@ -79,7 +87,7 @@ func (a *Architect) Init() {
 	branchManager := githistory.NewBranchManager(a.DB)
 	taskManager := task.NewManager(a.DB, projectManager, branchManager, commitManager)
 	buildStepManager := build.NewStepManager(a.DB)
-	buildStreamManager := build.NewStreamManager(a.DB)
+	buildStreamManager := build.NewStreamManager(a.DB, a.bDB)
 	buildManager := build.NewBuildManager(a.DB, buildStepManager, buildStreamManager)
 	builderManager := builder.NewManager(buildManager, knownHostManager, buildStepManager, buildStreamManager)
 	syncManager := v_sync.NewManager(projectManager, taskManager, branchManager, commitManager)

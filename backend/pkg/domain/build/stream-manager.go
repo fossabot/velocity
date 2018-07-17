@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/asdine/storm"
+	"github.com/dgraph-io/badger"
 	uuid "github.com/satori/go.uuid"
 	"github.com/velocity-ci/velocity/backend/pkg/domain"
 	"github.com/velocity-ci/velocity/backend/pkg/velocity"
@@ -16,16 +17,19 @@ const (
 )
 
 type StreamManager struct {
-	db *streamStormDB
+	db  *streamStormDB
+	bdb *streamBadgerDB
 
 	brokers []domain.Broker
 }
 
 func NewStreamManager(
 	db *storm.DB,
+	bdb *badger.DB,
 ) *StreamManager {
 	m := &StreamManager{
 		db:      newStreamStormDB(db),
+		bdb:     newStreamBadgerDB(bdb),
 		brokers: []domain.Broker{},
 	}
 	return m
@@ -45,16 +49,17 @@ func (m *StreamManager) create(
 		Name: name,
 	}
 
-	m.db.save(stream)
+	m.bdb.save(stream)
 	return stream
 }
 
 func (m *StreamManager) update(s *Stream) error {
-	return m.db.save(s)
+	return m.bdb.save(s)
 }
 
 func (m *StreamManager) GetByID(id string) (*Stream, error) {
-	return GetStreamByID(m.db.DB, id)
+	// return GetStreamByID(m.db.DB, id)
+	return m.bdb.getStreamByID(id)
 }
 
 func (m *StreamManager) CreateStreamLine(
@@ -69,7 +74,7 @@ func (m *StreamManager) CreateStreamLine(
 		Timestamp:  timestamp,
 		Output:     fmt.Sprintf("%s", output),
 	}
-	m.db.saveStreamLine(sL)
+	m.bdb.saveStreamLine(sL)
 	for _, b := range m.brokers {
 		b.EmitAll(&domain.Emit{
 			Topic:   fmt.Sprintf("stream:%s", stream.ID),
@@ -81,15 +86,16 @@ func (m *StreamManager) CreateStreamLine(
 }
 
 func (m *StreamManager) GetStreamsForStep(s *Step) []*Stream {
-	return getStreamsByStepID(m.db.DB, s.ID)
+	// return getStreamsByStepID(m.db.DB, s.ID)
+	return m.bdb.getStreamsByStepID(s.ID)
 }
 
 func (m *StreamManager) GetStreamLines(s *Stream, q *domain.PagingQuery) ([]*StreamLine, int) {
-	return m.db.getLinesByStream(s, q)
+	return m.bdb.getLinesByStream(s, q)
 }
 
 func (m *StreamManager) Update(stream *Stream) error {
-	if err := m.db.save(stream); err != nil {
+	if err := m.bdb.save(stream); err != nil {
 		return err
 	}
 	// for _, b := range m.brokers {

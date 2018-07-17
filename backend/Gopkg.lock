@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/AndreasBriese/bbloom"
+  packages = ["."]
+  revision = "28f7e881ca57bc00e028f9ede9f0d9104cfeef5e"
+
+[[projects]]
   name = "github.com/DATA-DOG/godog"
   packages = [
     ".",
@@ -49,10 +55,29 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/dgraph-io/badger"
+  packages = [
+    ".",
+    "options",
+    "protos",
+    "skl",
+    "table",
+    "y"
+  ]
+  revision = "391b6d3b93e6014fe8c2971fcc0c1266e47dbbd9"
+  version = "v1.5.3"
+
+[[projects]]
   name = "github.com/dgrijalva/jwt-go"
   packages = ["."]
   revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
   version = "v3.2.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/dgryski/go-farm"
+  packages = ["."]
+  revision = "2de33835d10275975374b37b2dcfd22c9020a1f5"
 
 [[projects]]
   name = "github.com/docker/distribution"
@@ -138,6 +163,12 @@
   name = "github.com/go-playground/universal-translator"
   packages = ["."]
   revision = "71201497bace774495daed26a3874fd339e0b538"
+
+[[projects]]
+  name = "github.com/golang/protobuf"
+  packages = ["proto"]
+  revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/gorilla/websocket"
@@ -288,7 +319,9 @@
   packages = [
     "context",
     "context/ctxhttp",
-    "proxy"
+    "internal/timeseries",
+    "proxy",
+    "trace"
   ]
   revision = "e0c57d8f86c17f0724497efcb3bc617e82834821"
 
@@ -319,6 +352,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f2623338270214dc5996830f82ff9125795b2fbacbe8462fa58149367061c04e"
+  inputs-digest = "0b3e35b0035113725488e9ddc258184b8410bfeba967d8852213fba819c88096"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/dgraph-io/badger"
+
 	"github.com/velocity-ci/velocity/backend/pkg/velocity"
 	"go.uber.org/zap"
 
@@ -16,6 +18,18 @@ func NewStormDB(path string) *storm.DB {
 	db, err := storm.Open(path)
 	if err != nil {
 		velocity.GetLogger().Fatal("could not create storm DB", zap.Error(err))
+	}
+
+	return db
+}
+
+func NewBadgerDB(path string) *badger.DB {
+	opts := badger.DefaultOptions
+	opts.Dir = path
+	opts.ValueDir = path
+	db, err := badger.Open(opts)
+	if err != nil {
+		velocity.GetLogger().Fatal("could not open badger DB", zap.Error(err))
 	}
 
 	return db
